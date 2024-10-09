@@ -329,8 +329,9 @@ namespace SeoulStayS4
                     AverageScore = a.ItemScores.Any() ? a.ItemScores.Average(s =>  s.Value) : (double?)null,
                     TotalReservations = a.Users.Bookings.Any() ? a.Users.Bookings.Count() : 0, 
                     AmountPayable = a.ItemPrices.FirstOrDefault() != null ? a.ItemPrices.FirstOrDefault().Price : (decimal?)null,
-
                 }).ToList();
+
+                
 
                 advancedSearchDataGrid.ItemsSource = result;
                 int san = result.Select(a => a.Property).Distinct().Count();
