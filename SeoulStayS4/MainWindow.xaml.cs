@@ -1,6 +1,7 @@
 ﻿using SeoulStayS4.Entities;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,6 +71,10 @@ namespace SeoulStayS4
 
             if (!string.IsNullOrEmpty(selectedArea))
             {
+                titleTextBox.Visibility = Visibility.Hidden;
+                titleCombo.Visibility = Visibility.Visible;
+                attractionCombo.Visibility = Visibility.Visible;
+                attractionTextBox.Visibility = Visibility.Hidden;
                 using (var context = new SeoulStayS4Entities())
                 {
                     var areaId = context.Areas.FirstOrDefault(a => a.Name == selectedArea).ID;
@@ -95,6 +100,37 @@ namespace SeoulStayS4
             advancedSearchGrid.Visibility = Visibility.Hidden;
         }
 
+        private void searchProperties_KeyUp(object sender, KeyEventArgs e) //Jattau kerek mynany, uirenip
+        {
+            string query = searchProperties.Text;
+            if (query.Length >= 3) 
+            {
+                using (var context = new SeoulStayS4Entities())
+                {
+                    var suggestions = context.Items
+                        .Where(i => i.Title.Contains(query) ||
+                                    i.Areas.Name.Contains(query) ||
+                                    i.ItemAttractions.Any(at => at.Attractions.Name.Contains(query)) ||
+                                    i.ItemTypes.Name.Contains(query) ||
+                                    i.ItemAmenities.Any(a => a.Amenities.Name.Contains(query)))
+                        .Select(i => new
+                        {
+                            Name = i.Title,
+                        }).ToList();
+
+                    searchProperties.ItemsSource = suggestions;
+                    searchProperties.DisplayMemberPath = "Name";
+                    searchProperties.SelectedValuePath = "Type";
+                    searchProperties.IsDropDownOpen = true; 
+                }
+            }
+            else
+            {
+                searchProperties.IsDropDownOpen = false; // Hide suggestions if less than 3 characters
+            }
+        }
+
+
         private void searchBtn_Click(object sender, RoutedEventArgs e)
         {
             string searching = searchProperties.Text;
@@ -103,11 +139,15 @@ namespace SeoulStayS4
             int? people = string.IsNullOrEmpty(peopleNum.Text) ? (int?)null : int.Parse(peopleNum.Text);
             DateTime current = DateTime.Now;
 
-            if ( dateTime.Value.Date < current.Date)
+            if (dateTime.HasValue)
             {
-                MessageBox.Show("Date can not be earlier than current time", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                if (dateTime.Value.Date < current.Date)
+                {
+                    MessageBox.Show("Date can not be earlier than current time", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
             }
+            
 
             using (var context = new SeoulStayS4Entities())
             {
@@ -147,6 +187,8 @@ namespace SeoulStayS4
                 }).ToList();
 
                 simpleSearchDataGrid.ItemsSource = results;
+
+                displayingOptions.Text = $"Displaying {results.Count} options";
             }
         }
 
@@ -165,11 +207,135 @@ namespace SeoulStayS4
             amenityCombo.SelectedIndex = -1;
             amenityCombo2.SelectedIndex = -1;
             amenityCombo3.SelectedIndex = -1;
+            propertyTypeCombo.SelectedIndex = -1;
         }
 
         private void searchPropertyBtn_Click(object sender, RoutedEventArgs e)
         {
+            string selectedArea = areaCombo.SelectedItem?.ToString();
+            string selectedTitle = titleCombo.SelectedItem?.ToString();
+            string selectedAttraction = attractionCombo.SelectedItem?.ToString();
+            string amenity1 = amenityCombo.SelectedItem?.ToString();
+            string amenity2 = amenityCombo2.SelectedItem?.ToString();
+            string amenity3 = amenityCombo3.SelectedItem?.ToString();
+            string property2 = propertyTypeCombo.SelectedItem?.ToString();
+            DateTime? fromDate = fromDate2.SelectedDate;
+            DateTime? finishDate = toDate.SelectedDate;
+            decimal? nights = string.IsNullOrEmpty(nightsNum2.Text) ? (decimal?)null : int.Parse(nightsNum2.Text);
+            decimal? capacity = string.IsNullOrEmpty(peopleNum2.Text) ? (decimal?)null : int.Parse(peopleNum2.Text);
+            int? startPrice = string.IsNullOrEmpty(strartPriceNum.Text) ? (int?)null : int.Parse(strartPriceNum.Text);
+            int? maxPrice = string.IsNullOrEmpty(maxPriceNum.Text) ? (int?)null : int.Parse(maxPriceNum.Text);
+            DateTime now = DateTime.Now;
 
+            using (var context = new SeoulStayS4Entities())
+            {
+                var query = context.Items.AsQueryable();
+
+                if (!string.IsNullOrEmpty(selectedArea))
+                {
+                    query = query.Where(a => a.Areas.Name == selectedArea);
+                }
+
+                if (!string.IsNullOrEmpty(selectedAttraction))
+                {
+                    query = query.Where(a => a.ItemAttractions.Any(i => i.Items.Title == selectedAttraction));
+                }
+
+                if (!string.IsNullOrEmpty(selectedTitle))
+                {
+                    query = query.Where(a => a.Title == selectedTitle); 
+                }
+
+                if (fromDate.HasValue && finishDate.HasValue)
+                {
+                    if (fromDate.Value.Date < now.Date)
+                    {
+                        MessageBox.Show("Date can not be earlier than current time", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    if (finishDate.Value.Date < fromDate.Value.Date)
+                    {
+                        MessageBox.Show("Date can not be earlier than start time", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                } 
+                else
+
+                {
+                    MessageBox.Show("Choose date", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (titleTextBox.IsVisible)
+                {
+                    string title = titleTextBox?.Text;
+
+                    query = query.Where(a => a.Title.Contains(title));
+                }
+
+                if (attractionTextBox.IsVisible)
+                {
+                    string attraction = attractionTextBox?.Text;
+
+                    query = query.Where(a => a.ItemAttractions.Any(i => i.Attractions.Name.Contains(attraction)));
+                }
+
+                if(capacity.HasValue && capacity > 0)
+                {
+                    query = query.Where(a => a.Capacity >= capacity);
+
+                }
+                else
+                {
+                    MessageBox.Show("Capacity should be at least 1", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (!nights.HasValue || nights < 1 || nights > 15)
+                {
+                    MessageBox.Show("Nights should be at least 1 and maximum 15 ", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                else
+                
+                {
+                    query = query.Where(a => a.MinimumNights <= nights && a.MaximumNights >= nights);
+                }
+
+                if (!string.IsNullOrEmpty(property2))
+                {
+                    query = query.Where(i => i.ItemTypes.Name == property2);
+                }
+
+                if (!string.IsNullOrEmpty(amenity1))
+                {
+                    query = query.Where(i => i.ItemAmenities.Any(a => a.Amenities.Name == amenity1));
+                }
+
+                if (!string.IsNullOrEmpty(amenity2))
+                {
+                    query = query.Where(i => i.ItemAmenities.Any(a => a.Amenities.Name == amenity2));
+                }
+                if (!string.IsNullOrEmpty(amenity3))
+                {
+                    query = query.Where(i => i.ItemAmenities.Any(a => a.Amenities.Name == amenity3));
+                }
+            
+                var result = query.Select(a => new
+                {
+                    Property = a.Title,
+                    Area = a.Areas.Name,
+                    AverageScore = a.ItemScores.Any() ? a.ItemScores.Average(s =>  s.Value) : (double?)null,
+                    TotalReservations = a.Users.Bookings.Any() ? a.Users.Bookings.Count() : 0, 
+                    AmountPayable = a.ItemPrices.FirstOrDefault() != null ? a.ItemPrices.FirstOrDefault().Price : (decimal?)null,
+
+                }).ToList();
+
+                advancedSearchDataGrid.ItemsSource = result;
+                int san = result.Select(a => a.Property).Distinct().Count();
+                displayingOptions.Text = $"Displaying {result.Count} options from {san} properties";
+            }
         }
 
         

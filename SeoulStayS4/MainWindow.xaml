@@ -14,7 +14,16 @@
             <ColumnDefinition Width="145*"/>
         </Grid.ColumnDefinitions>
         <Grid Visibility="Visible" x:Name="simpleSearchGrid" Grid.ColumnSpan="4" Margin="13,0,10,10">
-            <TextBox x:Name="searchProperties" HorizontalAlignment="Left" Margin="10,34,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="613" FontSize="18" Grid.ColumnSpan="2" Grid.Column="1"/>
+            <!--  <TextBox x:Name="searchProperties" HorizontalAlignment="Left" Margin="10,34,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="613" FontSize="18" Grid.ColumnSpan="2" Grid.Column="1"/> --> <!--Mynany da jattau kerek-->
+            <ComboBox x:Name="searchProperties" 
+                      HorizontalAlignment="Left" 
+                      Margin="10,34,0,0" 
+                      VerticalAlignment="Top" 
+                      Width="613" 
+                      FontSize="18" 
+                      IsEditable="True" 
+                      KeyUp="searchProperties_KeyUp" />
+            
             <Button x:Name="searchBtn" Content="Search properties" HorizontalAlignment="Left" Margin="721,32,0,0" VerticalAlignment="Top" FontSize="18" Width="178" Click="searchBtn_Click"/>
             <DatePicker x:Name="fromDate" Margin="71,71,712,0" VerticalAlignment="Top" FontSize="18"/>
             <Label Content="From:" HorizontalAlignment="Left" Margin="10,69,0,0" VerticalAlignment="Top" FontSize="18"/>
@@ -46,9 +55,9 @@
             <ComboBox SelectionChanged="areaCombo_SelectionChanged" x:Name="areaCombo" HorizontalAlignment="Left" Margin="135,26,0,0" VerticalAlignment="Top" Width="149" FontSize="16"/>
             <Label Content="Attraction:" HorizontalAlignment="Left" Margin="309,23,0,0" VerticalAlignment="Top" FontSize="16" Width="91"/>
             <TextBox x:Name="nightsNum2" HorizontalAlignment="Left" Margin="528,77,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="75" FontSize="16"/>
-            <ComboBox x:Name="attractionCombo" HorizontalAlignment="Left" Margin="422,27,0,0" VerticalAlignment="Top" Width="148" FontSize="16"/>
+            <ComboBox Visibility="Hidden" x:Name="attractionCombo" HorizontalAlignment="Left" Margin="422,27,0,0" VerticalAlignment="Top" Width="148" FontSize="16"/>
             <Label Content="Property title" HorizontalAlignment="Left" Margin="606,28,0,0" VerticalAlignment="Top" FontSize="16" Width="110"/>
-            <ComboBox x:Name="titleCombo" HorizontalAlignment="Left" Margin="721,28,0,0" VerticalAlignment="Top" Width="148" FontSize="16"/>
+            <ComboBox Visibility="Hidden" x:Name="titleCombo" HorizontalAlignment="Left" Margin="721,28,0,0" VerticalAlignment="Top" Width="148" FontSize="16"/>
             <Label Content="Amenity:" HorizontalAlignment="Left" Margin="60,157,0,0" VerticalAlignment="Top" FontSize="16" Width="90"/>
             <ComboBox x:Name="amenityCombo" HorizontalAlignment="Left" Margin="154,164,0,0" VerticalAlignment="Top" Width="151" FontSize="16"/>
             <Label Content="From:" HorizontalAlignment="Left" Margin="58,70,0,0" VerticalAlignment="Top" FontSize="16" Width="59"/>
@@ -69,7 +78,8 @@
             <ComboBox x:Name="amenityCombo2" HorizontalAlignment="Left" Margin="421,164,0,0" VerticalAlignment="Top" Width="151" FontSize="16"/>
             <Label Content="Amenity:" HorizontalAlignment="Left" Margin="608,157,0,0" VerticalAlignment="Top" FontSize="16" Width="90"/>
             <ComboBox x:Name="amenityCombo3" HorizontalAlignment="Left" Margin="702,164,0,0" VerticalAlignment="Top" Width="150" FontSize="16"/>
-
+            <TextBox x:Name="attractionTextBox" HorizontalAlignment="Left" Margin="422,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="148" FontSize="16" Height="27"/>
+            <TextBox x:Name="titleTextBox" HorizontalAlignment="Left" Margin="720,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="148" FontSize="16" Height="27"/>
             <DataGrid x:Name="advancedSearchDataGrid" AutoGenerateColumns="False" Margin="11,280,10,30" Grid.ColumnSpan="4"  >
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Property" Width="*" Binding="{Binding Property}"/>
@@ -80,11 +90,12 @@
                     <DataGridTextColumn Header="Check-in at" Width="*" Binding="{Binding CheckIn}" />
                 </DataGrid.Columns>
             </DataGrid>
+            
         </Grid>
 
         <TextBlock HorizontalAlignment="Left" Margin="11,254,0,0" TextWrapping="Wrap" Text="Simple Result" VerticalAlignment="Top" FontSize="16" Grid.ColumnSpan="2"/>
         
-        <TextBlock x:Name="displayingOptions" HorizontalAlignment="Left" Margin="11,580,0,0" TextWrapping="Wrap" Text="Displaying options" VerticalAlignment="Top" Grid.ColumnSpan="2" FontSize="18"/>
+        <TextBlock x:Name="displayingOptions" HorizontalAlignment="Left" Margin="11,580,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Grid.ColumnSpan="2" FontSize="18"/>
 
     </Grid>
 </Window>
